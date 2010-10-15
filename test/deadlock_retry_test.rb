@@ -45,8 +45,9 @@ class MockModel
 end
 
 class DeadlockRetryTest < Test::Unit::TestCase
-  DEADLOCK_ERROR = "MySQL::Error: Deadlock found when trying to get lock"
-  TIMEOUT_ERROR = "MySQL::Error: Lock wait timeout exceeded"
+  DEADLOCK_ERROR    = "MySQL::Error: Deadlock found when trying to get lock"
+  PG_DEADLOCK_ERROR = "PGError: ERROR: deadlock detected LINE 1: INSERT INTO \"some table\""
+  TIMEOUT_ERROR     = "MySQL::Error: Lock wait timeout exceeded"
 
   def test_no_errors
     assert_equal :success, MockModel.transaction { :success }
@@ -54,6 +55,12 @@ class DeadlockRetryTest < Test::Unit::TestCase
 
   def test_no_errors_with_deadlock
     errors = [ DEADLOCK_ERROR ] * 3
+    assert_equal :success, MockModel.transaction { raise ActiveRecord::StatementInvalid, errors.shift unless errors.empty?; :success }
+    assert errors.empty?
+  end
+  
+  def test_no_errors_with_pg_deadlock
+    errors = [ PG_DEADLOCK_ERROR ] * 3
     assert_equal :success, MockModel.transaction { raise ActiveRecord::StatementInvalid, errors.shift unless errors.empty?; :success }
     assert errors.empty?
   end
@@ -66,7 +73,7 @@ class DeadlockRetryTest < Test::Unit::TestCase
 
   def test_error_if_limit_exceeded
     assert_raise(ActiveRecord::StatementInvalid) do
-      MockModel.transaction { raise ActiveRecord::StatementInvalid, DEADLOCK_ERROR }
+      MockModel.transaction { raise ActiveRecord::StatementInvalid, PG_DEADLOCK_ERROR }
     end
   end
 

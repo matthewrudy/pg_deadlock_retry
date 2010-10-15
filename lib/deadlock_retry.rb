@@ -32,10 +32,19 @@ module DeadlockRetry
 
   module ClassMethods
     DEADLOCK_ERROR_MESSAGES = [
+      # mysql messages - provided from the original rails/deadlock_retry plugin
       "Deadlock found when trying to get lock",
-      "Lock wait timeout exceeded"
+      "Lock wait timeout exceeded",
+    
+      # pg example
+      #   ActiveRecord::StatementInvalid: PGError: ERROR: deadlock detected LINE 1: INSERT INTO "some table"  (...
+      #   DETAIL:  Process 23748 waits for RowExclusiveLock on relation 1844454 of database 1844453; blocked by process 1754.
+      #	  Process 1754 waits for AccessExclusiveLock on relation 1844478 of database 1844453; blocked by process 23748.
+      #	  HINT:  See server log for query details.
+      #	  : INSERT INTO "some table" (...
+      "deadlock detected",
     ]
-
+    
     MAXIMUM_RETRIES_ON_DEADLOCK = 3
 
     def transaction_with_deadlock_handling(*objects, &block)

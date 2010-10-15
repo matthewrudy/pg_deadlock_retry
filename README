@@ -1,3 +1,11 @@
+Postgres Deadlock Retry
+==============
+
+Based on the original "Deadlock Retry" plugin
+I aim to make this work in Postgres too.
+
+But here is the original README below.
+
 Deadlock Retry
 ==============
 
