@@ -1,23 +1,10 @@
-begin
-  require 'active_record'
-rescue LoadError
-  if ENV['ACTIVERECORD_PATH'].nil?
-    abort <<MSG
-Please set the ACTIVERECORD_PATH environment variable to the directory
-containing the active_record.rb file.
-MSG
-  else
-    $LOAD_PATH.unshift << ENV['ACTIVERECORD_PATH']
-    begin
-      require 'active_record'
-    rescue LoadError
-      abort "ActiveRecord could not be found."
-    end
-  end
-end
+# bundle install
+require "rubygems"
+require "bundler/setup"
 
 require 'test/unit'
 require "#{File.dirname(__FILE__)}/../lib/deadlock_retry"
+require 'logger'
 
 class MockModel
   @@open_transactions = 0
